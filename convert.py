@@ -202,7 +202,15 @@ parser.add_argument(
     action='store',
     default=None,
     help="directory to use for temporary files when generating Encounter+ compendium" )
+parser.add_argument(
+    '--filter-sources',
+    dest="filterSources",
+    action='store',
+    default=None,
+    help="a comma-separated list of sources to filter the output, replacing --only-officials")
 args = parser.parse_args()
+if args.filterSources:
+    args.onlyofficial = args.filterSources.split(',')
 tempdir = None
 if args.combinedoutput and args.combinedoutput.endswith(".compendium"):
     if not args.tempdir:
