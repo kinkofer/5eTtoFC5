@@ -74,7 +74,7 @@ def parseClass(m, compendium, args):
         SFText.text = "• Weapons: " + weapontext
         SFText = ET.SubElement(StartingFeature, 'text')
         if "tools" in m['startingProficiencies']:
-            SFText.text = "• Tools: " + ", ".join(m['startingProficiencies']['tools'])
+            SFText.text = str(utils.fixTags("• Tools: " + ", ".join(m['startingProficiencies']['tools']),m,args.nohtml))
         else:
             SFText.text = "• Tools: none"
         SFText = ET.SubElement(StartingFeature, 'text')
@@ -138,7 +138,7 @@ def parseClass(m, compendium, args):
                         SFText.text = "• Weapons: " + MCweapontext
                 SFText = ET.SubElement(StartingFeature, 'text')
                 if "tools" in m['multiclassing']:
-                    MCtooltext = ", ".join(m['multiclassing']['tools'])
+                    MCtooltext = str(utils.fixTags(", ".join(m['multiclassing']['tools']),m,args.nohtml))
                 else:
                     MCtooltext = "none"
                 SFText.text = "• Tools: " + MCtooltext
@@ -153,7 +153,7 @@ def parseClass(m, compendium, args):
         weapons.text = weapontext
         tools = ET.SubElement(Class, 'tools')
         if "tools" in m['startingProficiencies']:
-            tools.text = ", ".join(m['startingProficiencies']['tools'])
+            tools.text = str(utils.fixTags(", ".join(m['startingProficiencies']['tools']),m,args.nohtml))
         else:
             tools.text = "none"
         if 'startingEquipment' in m and "goldAlternative" in m['startingEquipment']:
