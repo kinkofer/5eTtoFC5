@@ -929,6 +929,9 @@ for file in args.inputJSON:
                     if subclass['source'] in args.onlyofficial:
                         isOfficial = True
                         break
+                # Exception for Ranger (Spell-less)
+                if m['name'] == "Ranger (Spell-less)" and m['source'] not in args.onlyofficial:
+                    isOfficial = False
                 if not isOfficial:
                     if args.verbose:
                         print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
