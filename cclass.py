@@ -259,8 +259,6 @@ def parseClass(m, compendium, args):
                 for subfeature in feature['entries']:
                     if type(subfeature) == dict and 'type' in subfeature and subfeature['type'] == 'options':
                         for opt in subfeature['entries']:
-                            sfopt = ET.SubElement(autolevel,'feature',{"optional": "YES"})
-                            sfoptname = ET.SubElement(sfopt,'name')
                             if opt["type"] == "refOptionalfeature":
                                 optRef = opt["optionalfeature"].split('|')
                                 with open("./data/optionalfeatures.json",encoding='utf-8') as f:
@@ -296,6 +294,8 @@ def parseClass(m, compendium, args):
                                     if args.verbose:
                                         print("Skipping unoffical content: {} from {}".format(opt['name'],utils.getFriendlySource(opt['source'])))
                                     continue
+                            sfopt = ET.SubElement(autolevel,'feature',{"optional": "YES"})
+                            sfoptname = ET.SubElement(sfopt,'name')
                             sfoptname.text = "{}: {}".format(utils.fixTags(feature["name"],m,args.nohtml),utils.fixTags(opt["name"],m,args.nohtml))
                             flatten_json(opt['entries'],m,sfopt,args, level,attributes)
                             if not args.srd:
