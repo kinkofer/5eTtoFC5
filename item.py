@@ -104,8 +104,8 @@ def parseItem(m, compendium, args):
 
     if 'rarity' in m and m['rarity'] != 'None' and m['rarity'] != 'Unknown' and not args.nohtml:
         rarity = ET.SubElement(itm, 'rarity')
-        rarity.text = str(m['rarity'])
-        if m['rarity'] != 'None' and m['rarity'] != 'Unknown': headings.append(m['rarity'])
+        rarity.text = str(m['rarity']).title()
+        if m['rarity'] != 'None' and m['rarity'] != 'Unknown': headings.append(str(m['rarity']).title())
 
 
     if 'value' in m:
@@ -174,6 +174,10 @@ def parseItem(m, compendium, args):
             headings.append('Vehicle (water)')
         elif m['type'] == 'TAH':
             headings.append('Tack and Harness')
+        elif m['type'] == 'FD':
+            headings.append('Food and Drink')
+        elif m['type'] == 'MR':
+            headings.append('Magic Rune')
         elif m['type'] == 'OTH':
             headings.append('Other')
     if not args.nohtml:
@@ -253,10 +257,7 @@ def parseItem(m, compendium, args):
 
     if 'strength' in m:
         strength = ET.SubElement(itm, 'strength')
-        if m['strength']:
-            strength.text = str(m['strength'])
-        else:
-            strength.text = ""
+        strength.text = str(m['strength'] or '')
         if m['type'] == "HA":
             m['entries'].append("If the wearer has a Strength score lower than {}, their speed is reduced by 10 feet.".format(m['strength']))
 
