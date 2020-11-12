@@ -242,7 +242,8 @@ def parseClass(m, compendium, args):
                     # if type(featureRef) == dict and "gainSubclassFeature" in featureRef and featureRef["gainSubclassFeature"]==True:
                     #     currentsubclassFeature += 1
                     continue
-                if args.onlyofficial:
+                if args.onlyofficial and \
+                    m['source'] not in ['UAModifyingClasses', 'UARanger', 'UATheRangerRevised']:
                     if 'source' in feature and feature['source'] not in args.onlyofficial:
                         if args.verbose:
                             print("Skipping unoffical content: {} from {}".format(feature['name'],utils.getFriendlySource(feature['source'])))
@@ -250,7 +251,8 @@ def parseClass(m, compendium, args):
                         #     currentsubclassFeature += 1
                         continue
             if not args.onlyofficial or \
-            ('source' in feature and feature['source'] in args.onlyofficial):
+                ('source' in feature and feature['source'] in args.onlyofficial) or \
+                m['source'] in ['UAModifyingClasses', 'UARanger', 'UATheRangerRevised']:
                 autolevel = ET.SubElement(Class, 'autolevel', attributes)
                 attributes = {}
                 ft = ET.SubElement(autolevel, 'feature',attributes)
@@ -289,7 +291,8 @@ def parseClass(m, compendium, args):
                                 if args.verbose:
                                     print("Skipping UA Feature:",m['name'],opt['name'])
                                 continue
-                            if args.onlyofficial:
+                            if args.onlyofficial and \
+                                m['source'] not in ['UAModifyingClasses', 'UARanger', 'UATheRangerRevised']:
                                 if 'source' in opt and opt['source'] not in args.onlyofficial:
                                     if args.verbose:
                                         print("Skipping unoffical content: {} from {}".format(opt['name'],utils.getFriendlySource(opt['source'])))
@@ -330,7 +333,8 @@ def parseClass(m, compendium, args):
                             print("Skipping UA Subclass:",m['name'],subclass['name'])
                         currentsubclass += 1
                         continue
-                    if args.onlyofficial:
+                    if args.onlyofficial and \
+                        m['source'] not in ['UAModifyingClasses', 'UARanger', 'UATheRangerRevised']:
                         if 'source' in subclass and subclass['source'] not in args.onlyofficial:
                             if args.verbose:
                                 print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))

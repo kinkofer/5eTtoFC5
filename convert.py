@@ -929,9 +929,14 @@ for file in args.inputJSON:
                     if subclass['source'] in args.onlyofficial:
                         isOfficial = True
                         break
-                # Exception for Ranger (Spell-less)
-                if m['name'] == "Ranger (Spell-less)" and m['source'] not in args.onlyofficial:
+                # Exception for Ranger variants
+                if (m['name'] in ["Ranger (Spell-less)", "Ranger (Ambuscade)", "Ranger (Revised)"]) and \
+                    m['source'] not in args.onlyofficial:
                     isOfficial = False
+                elif (m['name'] == "Ranger (Spell-less)" and m['source'] == "UAModifyingClasses") or \
+                    (m['name'] == "Ranger (Ambuscade)" and m['source'] == "UARanger") or \
+                    (m['name'] == "Ranger (Revised)" and m['source'] == "UATheRangerRevised"):
+                    isOfficial = True
                 if not isOfficial:
                     if args.verbose:
                         print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
