@@ -21,13 +21,18 @@ def parseSpell(m, compendium, args):
             if args.skipua and c['source'].startswith('UA'):
                 continue
             if args.onlyofficial:
+                # Skip classes when evaluating UAClassFeatureVariants because all data is in fromClassListVariant
                 if "UAClassFeatureVariants" in args.onlyofficial:
                     continue
+                # Skip class if this file is PHB but evaluating a source that's not in PHB
                 if "phb" in os.path.basename(args.inputJSON[0]) and \
                     c['source'] not in args.onlyofficial:
                     continue
+                # If this file is not PHB, don't skip PHB classes if evaluating the source file
+                # ex. Include PHB classes if file is SCAG and evaluating SCAG
                 if "phb" not in os.path.basename(args.inputJSON[0]):
-                    if args.onlyofficial[0].lower() in os.path.basename(args.inputJSON[0]):
+                    if args.onlyofficial[0].lower() in os.path.basename(args.inputJSON[0]) or \
+                        (args.onlyofficial[0].startswith("UA") and "-ua-" in os.path.basename(args.inputJSON[0])):
                         if c['source'] != "PHB" and \
                             c['source'] not in args.onlyofficial:
                             continue
