@@ -662,7 +662,8 @@ for file in args.inputJSON:
                         print("Skipping UA Content: ",m['name'])
                     continue
             if args.onlyofficial:
-                if m['source'] not in args.onlyofficial:
+                # Check sources for classes instead of spell
+                if not utils.checkOfficialSpell(m, args):
                     if args.verbose:
                         print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
                     continue

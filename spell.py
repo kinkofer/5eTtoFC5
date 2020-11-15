@@ -12,6 +12,55 @@ def parseSpell(m, compendium, args):
     name = ET.SubElement(spell, 'name')
     name.text = m['name']
 
+    classes = ET.SubElement(spell, 'classes')
+    classlist = []
+    if "classes" in m and "fromClassList" in m["classes"]:
+        for c in m["classes"]["fromClassList"]:
+            if args.srd and c['source'] != 'PHB':
+                continue
+            if args.skipua and c['source'].startswith('UA'):
+                continue
+            if args.onlyofficial:
+                if "UAClassFeatureVariants" in args.onlyofficial:
+                    continue
+                if "phb" in os.path.basename(args.inputJSON[0]) and \
+                    c['source'] not in args.onlyofficial:
+                    continue
+                if "phb" not in os.path.basename(args.inputJSON[0]):
+                    if args.onlyofficial[0].lower() in os.path.basename(args.inputJSON[0]):
+                        if c['source'] != "PHB" and \
+                            c['source'] not in args.onlyofficial:
+                            continue
+                    else:
+                        if c['source'] not in args.onlyofficial:
+                            continue
+            classlist.append(c["name"] + " (UA)" if c["source"].startswith("UA") else c["name"])
+    if "classes" in m and "fromSubclass" in m["classes"]:
+        for c in m["classes"]["fromSubclass"]:
+            if args.srd:
+                continue
+            if args.skipua and (c["class"]["source"].startswith("UA") or c["subclass"]["source"].startswith("UA")):
+                continue
+            if args.onlyofficial:
+                if "UAClassFeatureVariants" in args.onlyofficial:
+                    continue
+                if c["subclass"]["source"] not in args.onlyofficial:
+                    continue
+                if c["class"]["source"] in ["UAModifyingClasses", "UARanger", "UATheRangerRevised"] and \
+                    c["class"]["source"] not in args.onlyofficial:
+                    continue
+            classlist.append("{} ({})".format(c["class"]["name"] + " (UA)" if c["class"]["source"].startswith("UA") else c["class"]["name"],c["subclass"]["name"]))
+    if "classes" in m and "fromClassListVariant" in m["classes"]:
+        for c in m["classes"]["fromClassListVariant"]:
+            if "UAClassFeatureVariants" not in args.onlyofficial:
+                continue
+            classlist.append(c["name"] + " (UA)" if c["source"].startswith("UA") else c["name"])
+    classes.text = ", ".join(classlist)
+
+    if args.onlyofficial:
+        if m['source'] not in args.onlyofficial:
+            return
+
     level = ET.SubElement(spell, 'level')
     level.text = str(m['level'])
 
@@ -137,29 +186,6 @@ def parseSpell(m, compendium, args):
             dtxt = d["type"]
         durations.append(dtxt)
     duration.text = ", ".join(durations)
-    classes = ET.SubElement(spell, 'classes')
-    classlist = []
-    if "classes" in m and "fromClassList" in m["classes"]:
-        for c in m["classes"]["fromClassList"]:
-                if args.srd and c['source'] != 'PHB':
-                    continue
-                if args.skipua and c['source'].startswith('UA'):
-                    continue
-                if args.onlyofficial:
-                    if c['source'] not in args.onlyofficial:
-                        continue
-                classlist.append(c["name"] + " (UA)" if c["source"].startswith("UA") else c["name"])
-    if "classes" in m and "fromSubclass" in m["classes"]:
-        for c in m["classes"]["fromSubclass"]:
-                if args.srd:
-                    continue
-                if args.skipua and (c["class"]["source"].startswith("UA") or c["subclass"]["source"].startswith("UA")):
-                    continue
-                if args.onlyofficial:
-                    if c["class"]["source"] not in args.onlyofficial or c["subclass"]["source"] not in args.onlyofficial:
-                        continue
-                classlist.append("{} ({})".format(c["class"]["name"] + " (UA)" if c["class"]["source"].startswith("UA") else c["class"]["name"],c["subclass"]["name"]))
-    classes.text = ", ".join(classlist)
 
     if "entriesHigherLevel" in m:
         if "entries" not in m: m["entries"] = []

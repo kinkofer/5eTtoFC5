@@ -762,3 +762,21 @@ def getEntryString(e,m,args):
         return "\n".join([getEntryString(x,m,args) for x in e])
     else:
         return fixTags(str(e),m,args.nohtml)
+
+
+def checkOfficialSpell(m, args):
+    if m['source'] in args.onlyofficial:
+        return True
+    if 'fromClassList' in m['classes']:
+        for c in m['classes']['fromClassList']:
+            if c['source'] in args.onlyofficial:
+                return True
+    if 'fromClassListVariant' in m['classes']:
+        for c in m['classes']['fromClassListVariant']:
+            if c['source'] in args.onlyofficial or "UAClassFeatureVariants" in args.onlyofficial:
+                return True
+    if 'fromSubclass' in m['classes']:
+        for subclass in m['classes']['fromSubclass']:
+            if subclass['subclass']['source'] in args.onlyofficial:
+                return True
+    return False
