@@ -428,12 +428,21 @@ for file in args.inputJSON:
             if m['name'] == "Large Mimic" and m['source'] == "RMBRE":
                 m['original_name']=m['name']
                 m['name'] += " (Multiattack)"
-            if m['source'] == "UAArtificerRevisited":
+            if m['name'] == "Brain in a Jar" and m['source'] == "LLK":
                 m['original_name']=m['name']
-                m['name'] += " (Unearthed Arcana)"
+                m['name'] += " (Noncore)"
+            if m['name'] == "Medusa" and m['source'] == "MOT":
+                m['original_name']=m['name']
+                m['name'] += " (Theran Variant)"
+            if m['name'] == "Ice Troll" and m['source'] == "RoT":
+                m['original_name']=m['name']
+                m['name'] += " (Variant)"
+            if m['source'].startswith('UA'):
+                m['original_name'] = m['name']
+                m['name'] = m['name'] + " (UA)"
             for xmlmon in compendium.findall("./monster[name='{}']".format(re.sub(r'\'','*',m['name']))):
                 if args.verbose or args.showdupe:
-                    print ("{0} in {1} is duplicate entry for {2} from {3}".format(m['name'],utils.getFriendlySource(m['source']),xmlmon.find('name').text,xmlmon.find('source').text if xmlmon.find('source') else '--'))
+                    print ("{0} in {1} is duplicate entry for {2} from {3}".format(m['name'],utils.getFriendlySource(m['source']),xmlmon.find('name').text,xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
                 mdupe += 1
             if fluff is not None and 'monsterFluff' in fluff:
                 if 'entries' in m:
@@ -667,9 +676,12 @@ for file in args.inputJSON:
                     if args.verbose:
                         print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
                     continue
+            if m['source'].startswith('UA'):
+                m['original_name'] = m['name']
+                m['name'] = m['name'] + " (UA)"
             for xmlmon in compendium.findall("./spell[name='{}']".format(re.sub(r'\'','*',m['name']))):
                 if args.verbose or args.showdupe:
-                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') else '--'))
+                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
                 sdupe += 1
 
             if ignoreError:
@@ -705,7 +717,7 @@ for file in args.inputJSON:
                     continue
             for xmlmon in compendium.findall("./background[name='{}']".format(re.sub(r'\'','*',m['name']))):
                 if args.verbose or args.showdupe:
-                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') else '--'))
+                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
                 bdupe += 1
             if fluff is not None and 'backgroundFluff' in fluff:
                 if 'entries' in m:
@@ -997,10 +1009,12 @@ for file in args.inputJSON:
                 m['name'] += " (Acquisitions Incorporated)"
             elif m['name'] == "Ioun Stone" and m['source'] == "LLK":
                 m['name'] += " (Kwalish)"
-
+            if m['source'].startswith('UA'):
+                m['original_name'] = m['name']
+                m['name'] = m['name'] + " (UA)"
             for xmlmon in compendium.findall("./item[name='{}']".format(re.sub(r'\'','*',m['name']))):
                 if args.verbose or args.showdupe:
-                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') else '--'))
+                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
                 idupe += 1
 
             if ignoreError:
