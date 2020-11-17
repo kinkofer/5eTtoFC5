@@ -124,7 +124,10 @@ def parseMonster(m, compendium, args):
                 elif 'condition' in acs:
                     acstr.append(utils.fixTags(acs['condition'],m,True))
                 if 'special' in acs:
-                    acstr.append(utils.fixTags(acs['special'],m,True))
+                    if re.search("^[0-9]+( [(].*[)])*$", acs['special']):
+                        acstr.append(utils.fixTags(acs['special'],m,True))
+                    else:
+                        acstr.append('')
                 continue
             acstr.append(utils.fixTags("{}".format(
                 "{} {}".format(
@@ -212,8 +215,11 @@ def parseMonster(m, compendium, args):
         npcroll.text = "ally"
     save = ET.SubElement(monster, 'save')
     if 'save' in m:
-        save.text = ", ".join(["{} {}".format(str.capitalize(
-            key), value) for key, value in m['save'].items()])
+        saves = []
+        for key, value in m['save'].items():
+            if re.search("^[+-]?[0-9]+$", value, re.IGNORECASE):
+                saves.append("{} {}".format(str.capitalize(key), value))
+        save.text = ", ".join(saves)
 
     skill = ET.SubElement(monster, 'skill')
     if 'skill' in m:
