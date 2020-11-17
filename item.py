@@ -87,11 +87,14 @@ def parseItem(m, compendium, args):
         if m['type'] == 'GV':
             typ.text = 'G'
             headings.append("Generic Variant")
+    else:
+        m['type'] = 'G'
+        typ.text = 'G'
 
     if 'wondrous' in m and m['wondrous']:
         magic = ET.SubElement(itm, 'magic')
         magic.text = "1"
-        headings.append("Wondrous item")
+        headings.append("Wondrous item (tattoo)" if 'tattoo' in m and m['tattoo'] else "Wondrous item")
         if 'type' not in m:
             typ.text = 'W'
 
@@ -241,7 +244,6 @@ def parseItem(m, compendium, args):
 
     if 'entries' not in m:
         m['entries'] = []
-
     if 'resist' in m:
         if m['type'] == "LA" or m['type'] == "MA" or m['type'] == "HA":
             m['entries'].append("You have resistance to {} damage while you wear this armor.".format(m['resist']))

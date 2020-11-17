@@ -14,16 +14,17 @@ def parseClass(m, compendium, args):
     stats = {"str":"Strength","dex":"Dexterity","con":"Constitution","int":"Intelligence","wis":"Wisdom","cha":"Charisma"}
     slots=""
     numberofSkills=""
-    if m['source'] == "UASidekicks":
+    if 'hd' not in m:
         m['hd'] = { "number": 1, "faces": 10 }
-        m["startingProficiencies"] = {}   
+    if 'startingProficiencies' not in m:
+        m["startingProficiencies"] = {}
     if 'skills' not in m['startingProficiencies']:
         m['startingProficiencies']['skills'] = []
     Class = ET.SubElement(compendium, 'class')
     name = ET.SubElement(Class, 'name')
     name.text = m['name']
     if not args.onlyofficial or \
-    ('source' in m and m['source'] in args.onlyofficial):
+        ('source' in m and m['source'] in args.onlyofficial):
         hd = ET.SubElement(Class, 'hd')
         hd.text = str(m['hd']['faces'])
         saveProficiency = []
@@ -74,7 +75,7 @@ def parseClass(m, compendium, args):
         SFText.text = "• Weapons: " + weapontext
         SFText = ET.SubElement(StartingFeature, 'text')
         if "tools" in m['startingProficiencies']:
-            SFText.text = str(utils.fixTags("• Tools: " + ", ".join(m['startingProficiencies']['tools']),m,args.nohtml))
+            SFText.text = utils.fixTags("• Tools: " + ", ".join(m['startingProficiencies']['tools']),m,args.nohtml)
         else:
             SFText.text = "• Tools: none"
         SFText = ET.SubElement(StartingFeature, 'text')
@@ -98,7 +99,10 @@ def parseClass(m, compendium, args):
                 SFText.text = ""
         if not args.srd:
             SFText = ET.SubElement(StartingFeature, 'text')
-            SFText.text = "Source: " + utils.getFriendlySource(m['source']) + " p. " + str(m['page'])
+            if 'page' in m:
+                SFText.text = "Source: " + utils.getFriendlySource(m['source']) + " p. " + str(m['page'])
+            else:
+                SFText.text = "Source: " + utils.getFriendlySource(m['source'])
         if 'multiclassing' in m:
             myattributes = {"level":"1"}
             autolevel = ET.SubElement(Class, 'autolevel', myattributes)
@@ -138,7 +142,7 @@ def parseClass(m, compendium, args):
                         SFText.text = "• Weapons: " + MCweapontext
                 SFText = ET.SubElement(StartingFeature, 'text')
                 if "tools" in m['multiclassing']:
-                    MCtooltext = str(utils.fixTags(", ".join(m['multiclassing']['tools']),m,args.nohtml))
+                    MCtooltext = utils.fixTags(", ".join(m['multiclassing']['tools']),m,args.nohtml)
                 else:
                     MCtooltext = "none"
                 SFText.text = "• Tools: " + MCtooltext
@@ -146,19 +150,22 @@ def parseClass(m, compendium, args):
                 SFText.text = ""
             if not args.srd:
                 SFText = ET.SubElement(StartingFeature, 'text')
-                SFText.text = "Source: " + utils.getFriendlySource(m['source']) + " p. " + str(m['page'])
+                if 'page' in m:
+                    SFText.text = "Source: " + utils.getFriendlySource(m['source']) + " p. " + str(m['page'])
+                else:
+                    SFText.text = "Source: " + utils.getFriendlySource(m['source'])
         armor = ET.SubElement(Class, 'armor')
         armor.text = armortext
         weapons = ET.SubElement(Class, 'weapons')
         weapons.text = weapontext
         tools = ET.SubElement(Class, 'tools')
         if "tools" in m['startingProficiencies']:
-            tools.text = str(utils.fixTags(", ".join(m['startingProficiencies']['tools']),m,args.nohtml))
+            tools.text = utils.fixTags(", ".join(m['startingProficiencies']['tools']),m,args.nohtml)
         else:
             tools.text = "none"
         if 'startingEquipment' in m and "goldAlternative" in m['startingEquipment']:
             wealth = ET.SubElement(Class, 'wealth')
-            wealth.text = str(utils.fixTags(m['startingEquipment']['goldAlternative'],m,args.nohtml)).replace(" ", "")
+            wealth.text = utils.fixTags(m['startingEquipment']['goldAlternative'],m,args.nohtml)
         if 'casterProgression' in m:
             FullCaster =[[3,2,0,0,0,0,0,0,0,0],[3,3,0,0,0,0,0,0,0,0],[3,4,2,0,0,0,0,0,0,0],[4,4,3,0,0,0,0,0,0,0],[4,4,3,2,0,0,0,0,0,0],[4,4,3,3,0,0,0,0,0,0],[4,4,3,3,1,0,0,0,0,0],[4,4,3,3,2,0,0,0,0,0],[4,4,3,3,3,1,0,0,0,0],[5,4,3,3,3,2,0,0,0,0],[5,4,3,3,3,2,1,0,0,0],[5,4,3,3,3,2,1,0,0,0],[5,4,3,3,3,2,1,1,0,0],[5,4,3,3,3,2,1,1,0,0],[5,4,3,3,3,2,1,1,1,0],[5,4,3,3,3,2,1,1,1,0],[5,4,3,3,3,2,1,1,1,1],[5,4,3,3,3,3,1,1,1,1],[5,4,3,3,3,3,2,1,1,1],[5,4,3,3,3,3,2,2,1,1]]
             HalfCaster =[[0,0,0,0,0,0],[0,2,0,0,0,0],[0,3,0,0,0,0],[0,3,0,0,0,0],[0,4,2,0,0,0],[0,4,2,0,0,0],[0,4,3,0,0,0],[0,4,3,0,0,0],[0,4,3,2,0,0],[0,4,3,2,0,0],[0,4,3,3,0,0],[0,4,3,3,0,0],[0,4,3,3,1,0],[0,4,3,3,1,0],[0,4,3,3,2,0],[0,4,3,3,2,0],[0,4,3,3,3,1],[0,4,3,3,3,1],[0,4,3,3,3,2],[0,4,3,3,3,2]]
@@ -271,7 +278,8 @@ def parseClass(m, compendium, args):
                                         opt["name"] = of["name"]
                                         opt["entries"] = of["entries"]
                                         opt["source"] = of["source"]
-                                        opt["page"] = of ["page"]
+                                        if 'page' in cf:
+                                            opt["page"] = cf ["page"]
                                         break
                             elif opt["type"] == "refClassFeature":
                                 optRef = opt["classFeature"].split('|')
@@ -282,7 +290,8 @@ def parseClass(m, compendium, args):
                                         opt["name"] = cf["name"]
                                         opt["entries"] = cf["entries"]
                                         opt["source"] = cf["source"]
-                                        opt["page"] = cf ["page"]
+                                        if 'page' in cf:
+                                            opt["page"] = cf ["page"]
                                         break
                             if args.srd:
                                 if 'srd' not in opt or not opt['srd']:
@@ -445,8 +454,11 @@ def flatten_json(nested_json, d, Class, args, level, attributes,subclassname='')
                         blank = ET.SubElement(m, 'text')
                         blank.text = ""
                         for item in x["items"]:
-                            flatten(item['name'], m, args, "text")
-                            flatten(item['entry'], m, args, "list")
+                            if type(item) == str:
+                                flatten(item, m, args, "text")
+                            else:
+                                flatten(item['name'], m, args, "text")
+                                flatten(item['entry'], m, args, "list")
                         blank = ET.SubElement(m, 'text')
                         blank.text = ""
                     elif a=="type" and x[a]=="table" and "colLabels" in x:
