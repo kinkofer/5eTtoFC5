@@ -87,9 +87,6 @@ def parseItem(m, compendium, args):
         if m['type'] == 'GV':
             typ.text = 'G'
             headings.append("Generic Variant")
-    else:
-        m['type'] = 'G'
-        typ.text = 'G'
 
     if 'wondrous' in m and m['wondrous']:
         magic = ET.SubElement(itm, 'magic')
@@ -244,13 +241,32 @@ def parseItem(m, compendium, args):
 
     if 'entries' not in m:
         m['entries'] = []
+        if 'tattoo' in m and m['tattoo']:
+            m['entries'].append("Produced by a special needle, this magic tattoo features designs that emphasize one color{}.".format(
+                " ({})".format(m['color']) if 'color' in m else ''))
+            m['entries'].append( {
+                "type": "entries",
+                "name": "Tattoo Attunement",
+                "entries": [ "To attune to this item, you hold the needle to your skin where you want the tattoo to appear, pressing the needle there throughout the attunement process. When the attunement is complete, the needle turns into the ink that becomes the tattoo, which appears on the skin.","If your attunement to the tattoo ends, the tattoo vanishes, and the needle reappears in your space." ] } )
     if 'resist' in m:
-        if m['type'] == "LA" or m['type'] == "MA" or m['type'] == "HA":
-            m['entries'].append("You have resistance to {} damage while you wear this armor.".format(m['resist']))
-        elif m['type'] == "RG":
-            m['entries'].append("You have resistance to {} damage while wearing this ring.".format(m['resist']))
-        elif m['type'] == "P":
-            m['entries'].append("When you drink this potion, you gain resistance to {} damage for 1 hour.".format(m['resist']))
+        if 'type' in m:
+            if m['type'] == "LA" or m['type'] == "MA" or m['type'] == "HA":
+                m['entries'].append("You have resistance to {} damage while you wear this armor.".format(m['resist']))
+            elif m['type'] == "RG":
+                m['entries'].append("You have resistance to {} damage while wearing this ring.".format(m['resist']))
+            elif m['type'] == "P":
+                m['entries'].append("When you drink this potion, you gain resistance to {} damage for 1 hour.".format(m['resist']))
+        elif 'tattoo' in m and m['tattoo']:
+            m['entries'].append( {
+                "type": "entries",
+                "name": "Damage Resistance",
+                "entries": [
+                    "While the tattoo is on your skin, you have resistance to {} damage".format(m['resist'])
+                    ] } )
+            m['entries'].append( {
+                "type": "entries",
+                "name": "Damage Absorption",
+                "entries": ["When you take {} damage, you can use your reaction to gain immunity against that instance of the damage, and you regain a number of hit points equal to half the damage you would have taken. Once this reaction is used, it can't be used again until the next dawn.".format(m['resist'])] } )
 
     if 'stealth' in m and m['stealth']:
         stealth = ET.SubElement(itm, 'stealth')
@@ -396,6 +412,24 @@ def parseItem(m, compendium, args):
                         subentries.append(utils.fixTags(sube,m,args.nohtml))
                     elif type(sube) == dict and "text" in sube:
                         subentries.append(utils.fixTags(sube["text"],m,args.nohtml))
+                    elif type(sube) == dict and sube['type'] == 'table':
+                        if 'caption' in sube:
+                            subentries.append("{}".format(sube['caption']))
+                        if 'colLabels' in sube:
+                            subentries.append(" | ".join([utils.remove5eShit(x)
+                                                for x in sube['colLabels']]))
+                        for row in sube['rows']:
+                            rowthing = []
+                            for r in row:
+                                if isinstance(r, dict) and 'roll' in r:
+                                    rowthing.append(
+                                        "{}-{}".format(
+                                            r['roll']['min'],
+                                            r['roll']['max']) if 'min' in r['roll'] else str(
+                                            r['roll']['exact']))
+                                else:
+                                    rowthing.append(utils.fixTags(str(r),m,args.nohtml))
+                            subentries.append(" | ".join(rowthing))
                     elif type(sube) == dict and sube["type"] == "list" and "style" in sube and sube["style"] == "list-hang-notitle":
                         for item in sube["items"]:
                             if type(item) == dict and 'type' in item and item['type'] == 'item':
