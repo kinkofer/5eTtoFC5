@@ -165,7 +165,7 @@ def parseClass(m, compendium, args):
             tools.text = "none"
         if 'startingEquipment' in m and "goldAlternative" in m['startingEquipment']:
             wealth = ET.SubElement(Class, 'wealth')
-            wealth.text = utils.fixTags(m['startingEquipment']['goldAlternative'],m,args.nohtml)
+            wealth.text = utils.fixTags(m['startingEquipment']['goldAlternative'],m,args.nohtml).replace(" ", "")
         if 'casterProgression' in m:
             FullCaster =[[3,2,0,0,0,0,0,0,0,0],[3,3,0,0,0,0,0,0,0,0],[3,4,2,0,0,0,0,0,0,0],[4,4,3,0,0,0,0,0,0,0],[4,4,3,2,0,0,0,0,0,0],[4,4,3,3,0,0,0,0,0,0],[4,4,3,3,1,0,0,0,0,0],[4,4,3,3,2,0,0,0,0,0],[4,4,3,3,3,1,0,0,0,0],[5,4,3,3,3,2,0,0,0,0],[5,4,3,3,3,2,1,0,0,0],[5,4,3,3,3,2,1,0,0,0],[5,4,3,3,3,2,1,1,0,0],[5,4,3,3,3,2,1,1,0,0],[5,4,3,3,3,2,1,1,1,0],[5,4,3,3,3,2,1,1,1,0],[5,4,3,3,3,2,1,1,1,1],[5,4,3,3,3,3,1,1,1,1],[5,4,3,3,3,3,2,1,1,1],[5,4,3,3,3,3,2,2,1,1]]
             HalfCaster =[[0,0,0,0,0,0],[0,2,0,0,0,0],[0,3,0,0,0,0],[0,3,0,0,0,0],[0,4,2,0,0,0],[0,4,2,0,0,0],[0,4,3,0,0,0],[0,4,3,0,0,0],[0,4,3,2,0,0],[0,4,3,2,0,0],[0,4,3,3,0,0],[0,4,3,3,0,0],[0,4,3,3,1,0],[0,4,3,3,1,0],[0,4,3,3,2,0],[0,4,3,3,2,0],[0,4,3,3,3,1],[0,4,3,3,3,1],[0,4,3,3,3,2],[0,4,3,3,3,2]]
@@ -357,6 +357,10 @@ def parseClass(m, compendium, args):
                     #    ftname.text = "{}: {}".format(utils.fixTags(m['subclassTitle'],m,args.nohtml),subclassname)
                     for subfeature in m['subclassFeature']:
                         if subfeature['level'] != (level+1) or subfeature['subclassShortName'] != subclass['shortName']:
+                            continue
+                        if args.onlyofficial and \
+                            "isClassFeatureVariant" in subfeature and subfeature['isClassFeatureVariant'] and \
+                            subfeature['source'] not in args.onlyofficial:
                             continue
                         attributes = {"level": str(level+1)}
                         autolevel = ET.SubElement(Class, 'autolevel', attributes)

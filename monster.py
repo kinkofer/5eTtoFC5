@@ -226,7 +226,8 @@ def parseMonster(m, compendium, args):
         skills = []
         for key, value in m['skill'].items():
             if type(value) == str:
-                skills.append("{} {}".format(str.capitalize(key), value))
+                number = value.split(" ")[0]
+                skills.append("{} {}".format(str.capitalize(key), number))
             else:
                 if key == "other":
                     for sk in value:
@@ -240,7 +241,7 @@ def parseMonster(m, compendium, args):
 
     if 'passive' in m:
         passive = ET.SubElement(monster, 'passive')
-        passive.text = str(m['passive'])
+        passive.text = str(m['passive']).split(" ")[0]
 
     languages = ET.SubElement(monster, 'languages')
     if 'languages' in m:

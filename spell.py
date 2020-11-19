@@ -8,11 +8,6 @@ from slugify import slugify
 from shutil import copyfile
 
 def parseSpell(m, compendium, args):
-    spell = ET.SubElement(compendium, 'spell')
-    name = ET.SubElement(spell, 'name')
-    name.text = m['name']
-
-    classes = ET.SubElement(spell, 'classes')
     classlist = []
     if "classes" in m and "fromClassList" in m["classes"]:
         for c in m["classes"]["fromClassList"]:
@@ -57,9 +52,19 @@ def parseSpell(m, compendium, args):
             classlist.append("{} ({})".format(c["class"]["name"] + " (UA)" if c["class"]["source"].startswith("UA") else c["class"]["name"],c["subclass"]["name"]))
     if "classes" in m and "fromClassListVariant" in m["classes"]:
         for c in m["classes"]["fromClassListVariant"]:
-            if "UAClassFeatureVariants" not in args.onlyofficial:
+            if "definedInSource" in c and c["definedInSource"] not in args.onlyofficial:
                 continue
             classlist.append(c["name"] + " (UA)" if c["source"].startswith("UA") else c["name"])
+    
+    # Skip spells without a class list
+    if len(classlist) == 0:
+        return
+
+    spell = ET.SubElement(compendium, 'spell')
+    name = ET.SubElement(spell, 'name')
+    name.text = m['name']
+
+    classes = ET.SubElement(spell, 'classes')
     classes.text = ", ".join(classlist)
 
     if args.onlyofficial:
