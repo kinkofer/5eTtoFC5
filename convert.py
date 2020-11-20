@@ -351,9 +351,11 @@ for file in args.inputJSON:
     with open(file,encoding='utf-8') as f:
         d = json.load(f)
         f.close()
-
     fluff = None
-
+    if '_meta' in d:
+        args.filemeta = d['_meta']
+    else:
+        args.filemeta = None
     if os.path.isfile(os.path.split(file)[0] + "/fluff-" + os.path.split(file)[1]):
         if args.verbose:
             print("Fluff file found:",os.path.split(file)[0] + "/fluff-" + os.path.split(file)[1])
@@ -413,17 +415,17 @@ for file in args.inputJSON:
             if args.onlyofficial:
                 if m['source'] not in args.onlyofficial:
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             if m['name'] in ['Gar Shatterkeel','Shoalar Quanderil'] and m['source'] == 'LR':
                 m['original_name']=m['name']
-                m['name'] += "–"+utils.getFriendlySource(m['source'])
+                m['name'] += "–"+utils.getFriendlySource(m['source'],args)
             if m['name'] in ['Harpy','Felidar','Kraken'] and m['source'] in ['PSX','PSZ']:
                 m['original_name']=m['name']
-                m['name'] += "–"+utils.getFriendlySource(m['source'])
+                m['name'] += "–"+utils.getFriendlySource(m['source'],args)
             if m['name'] == 'Darathra Shendrel' and m['source'] == "SKT":
                 m['original_name']=m['name']
-                m['name'] += "–"+utils.getFriendlySource(m['source'])
+                m['name'] += "–"+utils.getFriendlySource(m['source'],args)
             if m['name'] == "Demogorgon" and m['source'] == "HftT":
                 m['original_name']=m['name']
                 m['name'] += " (monstrosity)"
@@ -450,7 +452,7 @@ for file in args.inputJSON:
                 m['name'] = m['name'] + " (UA)"
             for xmlmon in compendium.findall("./monster[name='{}']".format(re.sub(r'\'','*',m['name']))):
                 if args.verbose or args.showdupe:
-                    print ("{0} in {1} is duplicate entry for {2} from {3}".format(m['name'],utils.getFriendlySource(m['source']),xmlmon.find('name').text,xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
+                    print ("{0} in {1} is duplicate entry for {2} from {3}".format(m['name'],utils.getFriendlySource(m['source'],args),xmlmon.find('name').text,xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
                 mdupe += 1
             if fluff is not None and 'monsterFluff' in fluff:
                 if 'entries' in m:
@@ -488,14 +490,14 @@ for file in args.inputJSON:
             if args.onlyofficial:
                 if m['source'] not in args.onlyofficial:
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             if m['source'].startswith("UA"):
                 m['original_name'] = m['name']
                 m['name'] += " (Unearthed Arcana)"
             for xmlmon in compendium.findall("./monster[name='{}']".format(re.sub(r'\'','*',m['name']))):
                 if args.verbose or args.showdupe:
-                    print ("{0} in {1} is duplicate entry for {2} from {3}".format(m['name'],utils.getFriendlySource(m['source']),xmlmon.find('name').text,xmlmon.find('source').text))
+                    print ("{0} in {1} is duplicate entry for {2} from {3}".format(m['name'],utils.getFriendlySource(m['source'],args),xmlmon.find('name').text,xmlmon.find('source').text))
                 mdupe += 1
             if fluff is not None and 'vehicleFluff' in fluff:
                 if 'entries' in m:
@@ -682,7 +684,7 @@ for file in args.inputJSON:
                 # Check sources for classes instead of spell
                 if not utils.checkOfficialSpell(m, args):
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             if m['source'].startswith('UA'):
                 m['original_name'] = m['name']
@@ -721,7 +723,7 @@ for file in args.inputJSON:
             if args.onlyofficial:
                 if m['source'] not in args.onlyofficial:
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             for xmlmon in compendium.findall("./background[name='{}']".format(re.sub(r'\'','*',m['name']))):
                 if args.verbose or args.showdupe:
@@ -764,7 +766,7 @@ for file in args.inputJSON:
             if args.onlyofficial:
                 if m['source'] not in args.onlyofficial:
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             if m['source'].startswith('UA'):
                 m['original_name'] = m['name']
@@ -814,7 +816,7 @@ for file in args.inputJSON:
             if args.onlyofficial:
                 if m['source'] not in args.onlyofficial:
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             if m['source'].startswith('UA'):
                 m['original_name'] = m['name']
@@ -855,7 +857,7 @@ for file in args.inputJSON:
                     if args.onlyofficial:
                         if 'source' in sub and sub['source'] not in args.onlyofficial:
                             if args.verbose:
-                                print("Skipping unoffical content: {} from {}".format(sub['name'],utils.getFriendlySource(sub['source'])))
+                                print("Skipping unoffical content: {} from {}".format(sub['name'],utils.getFriendlySource(sub['source'],args)))
                             continue
                     sr = copy.deepcopy(m)
                     if "source" in sub and "source" in sr:
@@ -960,7 +962,7 @@ for file in args.inputJSON:
                     isOfficial = True
                 if not isOfficial:
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             if 'classFeature' not in m:
                 m['classFeature'] = d['classFeature']
@@ -1007,7 +1009,7 @@ for file in args.inputJSON:
             if args.onlyofficial:
                 if m['source'] not in args.onlyofficial:
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             if m['name'] == "Trinket" and m['source'] == "CoS":
                 m['name'] += " (Gothic)"
@@ -1049,7 +1051,7 @@ for file in args.inputJSON:
             if args.onlyofficial:
                 if m['source'] not in args.onlyofficial:
                     if args.verbose:
-                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'])))
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
                     continue
             if ignoreError:
                 try:

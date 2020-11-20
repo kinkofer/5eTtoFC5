@@ -242,7 +242,7 @@ def parseSpell(m, compendium, args):
 
     if 'source' in m and not args.srd:
         sourcetext = "{} p. {}".format(
-            utils.getFriendlySource(m['source']), m['page']) if 'page' in m and m['page'] != 0 else utils.getFriendlySource(m['source'])
+            utils.getFriendlySource(m['source'],args), m['page']) if 'page' in m and m['page'] != 0 else utils.getFriendlySource(m['source'],args)
 
         if 'otherSources' in m and m["otherSources"] is not None:
             for s in m["otherSources"]:
@@ -250,7 +250,7 @@ def parseSpell(m, compendium, args):
                     continue
                 sourcetext += ", "
                 sourcetext += "{} p. {}".format(
-                    utils.getFriendlySource(s["source"]), s["page"]) if 'page' in s and s["page"] != 0 else utils.getFriendlySource(s["source"])
+                    utils.getFriendlySource(s["source"],args), s["page"]) if 'page' in s and s["page"] != 0 else utils.getFriendlySource(s["source"],args)
         if 'entries' in m:
             if args.nohtml:
                 m['entries'].append("Source: {}".format(sourcetext))

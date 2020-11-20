@@ -595,7 +595,7 @@ def findFluffImage(fluff,m,t='monsterFluff'):
     return None
 
 
-def getFriendlySource(source):
+def getFriendlySource(source,args=None):
     friendly = source
     allbooks = [ "./data/books.json", "./data/adventures.json" ]
     srcfound = True
@@ -647,6 +647,12 @@ def getFriendlySource(source):
         friendly = re.sub(r"A L", r"Adventurers League: ", friendly)
     else:
         srcfound = False
+    if args and args.filemeta and 'sources' in args.filemeta:
+        for metasource in args.filemeta['sources']:
+            if metasource['json'] == source:
+                friendly = metasource['full']
+                srcfound = True
+                break
     for books in allbooks:
         if srcfound:
             break
@@ -715,7 +721,9 @@ def getEntryString(e,m,args):
                     else:
                         rowthing.append(getEntryString(r,m,args))
                 text += " | ".join(rowthing) + "\n"
-        elif e["type"] == "item":
+        elif e["type"] == "item" or e["type"] == "itemSub":
+            if "entry" not in e and "entries" in e:
+                e["entry"] = getEntryString(e["entries"],m,args)
             if args.nohtml:
                 text += "• {} {}".format(e["name"]+(":" if e["name"][-1:] not in ".:" else ""),getEntryString(e["entry"],m,args))
             else:

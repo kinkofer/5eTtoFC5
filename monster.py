@@ -337,7 +337,7 @@ def parseMonster(m, compendium, args):
             imagetag = ET.SubElement(monster, 'token')
             imagetag.text = "token_" + slug + ".jpg"
         sourcetext = "{} p. {}".format(
-            utils.getFriendlySource(m['source']), m['page']) if 'page' in m and m['page'] != 0 else utils.getFriendlySource(m['source'])
+            utils.getFriendlySource(m['source'],args), m['page']) if 'page' in m and m['page'] != 0 else utils.getFriendlySource(m['source'],args)
 
         if 'otherSources' in m and m["otherSources"] is not None:
             for s in m["otherSources"]:
@@ -345,7 +345,7 @@ def parseMonster(m, compendium, args):
                     continue
                 sourcetext += ", "
                 sourcetext += "{} p. {}".format(
-                    utils.getFriendlySource(s["source"]), s["page"]) if 'page' in s and s["page"] != 0 else utils.getFriendlySource(s["source"])
+                    utils.getFriendlySource(s["source"],args), s["page"]) if 'page' in s and s["page"] != 0 else utils.getFriendlySource(s["source"],args)
         #trait = ET.SubElement(monster, 'trait')
         #name = ET.SubElement(trait, 'name')
         #name.text = "Source"
@@ -363,6 +363,8 @@ def parseMonster(m, compendium, args):
             trait = ET.SubElement(monster, 'trait')
             name = ET.SubElement(trait, 'name')
             name.text = utils.remove5eShit(t['name'])
+            if "entries" not in t:
+                t["entries"] = []
             for e in utils.getEntryString(t["entries"],m,args).split("\n"):
                 text = ET.SubElement(trait, 'text')
                 text.text = e
@@ -392,6 +394,8 @@ def parseMonster(m, compendium, args):
                 text.text = e
 
     if 'variant' in m and m['variant'] is not None:
+        if type(m['variant']) != list:
+            m['variant'] = [ m['variant'] ]
         for t in m['variant']:
             action = ET.SubElement(monster, 'action')
             name = ET.SubElement(action, 'name')
