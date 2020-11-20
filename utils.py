@@ -666,6 +666,17 @@ def getFriendlySource(source):
         print("Could not find source: " + source)
     return friendly
 
+def getPublishedSources():
+    officialsources = []
+    for books in [ "./data/books.json", "./data/adventures.json" ]:
+        with open(books,encoding='utf-8') as f:
+            bks = json.load(f)
+            f.close()
+        key = list(bks.keys())[0]
+        for bk in bks[key]:
+            officialsources.append(bk['source'])
+    return officialsources
+
 def getEntryString(e,m,args):
     if type(e) == dict:
         text = ""
