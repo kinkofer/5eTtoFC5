@@ -5,8 +5,8 @@ import copy
 import json
 from slugify import slugify
 
-def ordinal(n): return "%d%s" % (
-    n, "tsnrhtdd"[(n / 10 % 10 != 1) * (n % 10 < 4) * n % 10::4])
+def ordinal(n):
+    return "%d%s" % (n,"tsnrhtdd"[(n//10%10!=1)*(n%10<4)*n%10::4])
 
 
 def parseRIV(m, t):

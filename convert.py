@@ -18,6 +18,7 @@ from cclass import parseClass
 from background import parseBackground
 from feat import parseFeat
 from race import parseRace
+from featureAsFeat import parseInvocation, parseInfusion, parseManeuver
 
 # Argument Parser
 parser = argparse.ArgumentParser(
@@ -347,6 +348,15 @@ if args.combinedoutput:
     cwins = 0
     closs = 0
     cdupe = 0
+    eidupe = 0
+    eiwins = 0
+    eiloss = 0
+    aidupe = 0
+    aiwins = 0
+    ailoss = 0
+    mvdupe = 0
+    mvwins = 0
+    mvloss = 0
 for file in args.inputJSON:
     with open(file,encoding='utf-8') as f:
         d = json.load(f)
@@ -399,6 +409,15 @@ for file in args.inputJSON:
         cwins = 0
         closs = 0
         cdupe = 0
+        eidupe = 0
+        eiwins = 0
+        eiloss = 0
+        aidupe = 0
+        aiwins = 0
+        ailoss = 0
+        mvdupe = 0
+        mvwins = 0
+        mvloss = 0
     if 'monster' in d:
         for m in d['monster']:
             if args.srd:
@@ -1190,6 +1209,159 @@ for file in args.inputJSON:
                         parseItem(v, compendium, args)
                         iwins += 1
 
+    # Eldritch Invocations
+    if 'optionalfeature' in d:
+        for m in d['optionalfeature']:
+            if type(m['featureType']) == list:
+                shouldSkip = True
+                for f in m['featureType']:
+                    if "EI" not in f:
+                        shouldSkip = False
+                        break
+                if shouldSkip:
+                    continue
+            elif "EI" not in m['featureType']:
+                continue
+            if args.srd:
+                if 'srd' not in m or not m['srd']:
+                    continue
+                elif type(m['srd']) == str:
+                    m['original_name'] = m['name']
+                    m['name'] = m['srd']
+            if args.skipua:
+                if m['source'].startswith('UA'):
+                    if args.verbose:
+                        print("Skipping UA Content: ",m['name'])
+                    continue
+            if args.onlyofficial:
+                if m['source'] not in args.onlyofficial:
+                    if args.verbose:
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
+                    continue
+            if m['source'].startswith('UA'):
+                m['original_name'] = m['name']
+                m['name'] = m['name'] + " (UA)"
+            for xmlmon in compendium.findall("./feat[name='Invocation: {}']".format(re.sub(r'\'','*',m['name']))):
+                if args.verbose or args.showdupe:
+                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
+                eidupe += 1
+            
+            if ignoreError:
+                try:
+                    parseInvocation(m, compendium, args)
+                    eiwins += 1
+                except Exception:
+                    print("FAILED: " + m['name'])
+                    eiloss += 1
+                    continue
+            else:
+                if args.verbose:
+                    print("Parsing " + m['name'])
+                parseInvocation(m, compendium, args)
+                eiwins += 1
+
+    # Artificer Infusions
+    if 'optionalfeature' in d:
+        for m in d['optionalfeature']:
+            if type(m['featureType']) == list:
+                shouldSkip = True
+                for f in m['featureType']:
+                    if "AI" in f:
+                        shouldSkip = False
+                        break
+                if shouldSkip:
+                    continue
+            elif "AI" not in m['featureType']:
+                continue
+            if args.srd:
+                if 'srd' not in m or not m['srd']:
+                    continue
+                elif type(m['srd']) == str:
+                    m['original_name'] = m['name']
+                    m['name'] = m['srd']
+            if args.skipua:
+                if m['source'].startswith('UA'):
+                    if args.verbose:
+                        print("Skipping UA Content: ",m['name'])
+                    continue
+            if args.onlyofficial:
+                if m['source'] not in args.onlyofficial:
+                    if args.verbose:
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
+                    continue
+            if m['source'].startswith('UA'):
+                m['original_name'] = m['name']
+                m['name'] = m['name'] + " (UA)"
+            for xmlmon in compendium.findall("./feat[name='Infusion: {}']".format(re.sub(r'\'','*',m['name']))):
+                if args.verbose or args.showdupe:
+                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
+                aidupe += 1
+            
+            if ignoreError:
+                try:
+                    parseInfusion(m, compendium, args)
+                    aiwins += 1
+                except Exception:
+                    print("FAILED: " + m['name'])
+                    ailoss += 1
+                    continue
+            else:
+                if args.verbose:
+                    print("Parsing " + m['name'])
+                parseInfusion(m, compendium, args)
+                aiwins += 1
+
+    # Maneuvers
+    if 'optionalfeature' in d:
+        for m in d['optionalfeature']:
+            if type(m['featureType']) == list:
+                shouldSkip = True
+                for f in m['featureType']:
+                    if "MV:" not in f:
+                        shouldSkip = False
+                        break
+                if shouldSkip:
+                    continue
+            elif "MV:" not in m['featureType']:
+                continue
+            if args.srd:
+                if 'srd' not in m or not m['srd']:
+                    continue
+                elif type(m['srd']) == str:
+                    m['original_name'] = m['name']
+                    m['name'] = m['srd']
+            if args.skipua:
+                if m['source'].startswith('UA'):
+                    if args.verbose:
+                        print("Skipping UA Content: ",m['name'])
+                    continue
+            if args.onlyofficial:
+                if m['source'] not in args.onlyofficial:
+                    if args.verbose:
+                        print("Skipping unoffical content: {} from {}".format(m['name'],utils.getFriendlySource(m['source'],args)))
+                    continue
+            if m['source'].startswith('UA'):
+                m['original_name'] = m['name']
+                m['name'] = m['name'] + " (UA)"
+            for xmlmon in compendium.findall("./feat[name='Maneuver: {}']".format(re.sub(r'\'','*',m['name']))):
+                if args.verbose or args.showdupe:
+                    print ("Found duplicate entry for {} from {}".format(m['name'],xmlmon.find('source').text if xmlmon.find('source') != None else '--'))
+                mvdupe += 1
+            
+            if ignoreError:
+                try:
+                    parseManeuver(m, compendium, args)
+                    mvwins += 1
+                except Exception:
+                    print("FAILED: " + m['name'])
+                    mvloss += 1
+                    continue
+            else:
+                if args.verbose:
+                    print("Parsing " + m['name'])
+                parseManeuver(m, compendium, args)
+                mvwins += 1
+
     print("Done converting " + os.path.splitext(file)[0])
 
     if not args.combinedoutput:
@@ -1221,6 +1393,19 @@ for file in args.inputJSON:
             print("Converted {}/{} races (failed {})".format(rwins, rwins +
                                                             rloss, rloss) if ignoreError else "Converted {} races".format(rwins))
             if rdupe > 0: print(" ({} duplicate{})".format(rdupe,"s" if rdupe > 1 else ""))
+        if eiwins > 0 or eiloss > 0:
+            print("Converted {}/{} invocations (failed {})".format(eiwins, eiwins +
+                                                            eiloss, eiloss) if ignoreError else "Converted {} invocations".format(eiwins))
+            if eidupe > 0: print(" ({} duplicate{})".format(eidupe,"s" if eidupe > 1 else ""))
+        if aiwins > 0 or ailoss > 0:
+            print("Converted {}/{} infusions (failed {})".format(aiwins, aiwins +
+                                                            ailoss, ailoss) if ignoreError else "Converted {} infusions".format(aiwins))
+            if aidupe > 0: print(" ({} duplicate{})".format(aidupe,"s" if aidupe > 1 else ""))
+        if mvwins > 0 or mvloss > 0:
+            print("Converted {}/{} maneuvers (failed {})".format(mvwins, mvwins +
+                                                            mvloss, mvloss) if ignoreError else "Converted {} maneuvers".format(mvwins))
+            if mvdupe > 0: print(" ({} duplicate{})".format(mvdupe,"s" if mvdupe > 1 else ""))
+        
 
         # write to file
         tree = ET.ElementTree(utils.indent(compendium, 1))
@@ -1259,7 +1444,18 @@ if args.combinedoutput:
         print("Converted {}/{} races (failed {})".format(rwins, rwins +
                                                         rloss, rloss) if ignoreError else "Converted {} races".format(rwins))
         if rdupe > 0: print(" ({} duplicate{})".format(rdupe,"s" if rdupe > 1 else ""))
-
+    if eiwins > 0 or eiloss > 0:
+        print("Converted {}/{} invocations (failed {})".format(eiwins, eiwins +
+                                                        eiloss, eiloss) if ignoreError else "Converted {} invocations".format(eiwins))
+        if eidupe > 0: print(" ({} duplicate{})".format(eidupe,"s" if eidupe > 1 else ""))
+    if aiwins > 0 or ailoss > 0:
+        print("Converted {}/{} infusions (failed {})".format(aiwins, aiwins +
+                                                        ailoss, ailoss) if ignoreError else "Converted {} infusions".format(aiwins))
+        if aidupe > 0: print(" ({} duplicate{})".format(aidupe,"s" if aidupe > 1 else ""))
+    if mvwins > 0 or mvloss > 0:
+        print("Converted {}/{} maneuvers (failed {})".format(mvwins, mvwins +
+                                                        mvloss, mvloss) if ignoreError else "Converted {} maneuvers".format(mvwins))
+        if mvdupe > 0: print(" ({} duplicate{})".format(mvdupe,"s" if mvdupe > 1 else ""))
 
     # write to file
     tree = ET.ElementTree(utils.indent(compendium, 1))
@@ -1273,7 +1469,7 @@ if args.combinedoutput:
             if tempdir:
                 tempdir.cleanup()
     else:
-        if mwins == 0 and swins == 0 and iwins == 0 and fwins == 0 and bwins == 0 and rwins == 0 and cwins == 0:
+        if mwins == 0 and swins == 0 and iwins == 0 and fwins == 0 and bwins == 0 and rwins == 0 and cwins == 0 and eiwins == 0 and aiwins == 0 and mvwins == 0:
             print("Nothing to output")
         else:
             tree.write(args.combinedoutput, xml_declaration=True, short_empty_elements=False, encoding='utf-8')
