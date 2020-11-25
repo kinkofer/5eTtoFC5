@@ -240,31 +240,38 @@ def parseClass(m, compendium, args):
             if type(featureRef) != dict or "gainSubclassFeature" not in featureRef or featureRef["gainSubclassFeature"] == False:
                 if args.srd:
                     if 'srd' not in feature or not feature['srd']:
-                        # if "gainSubclassFeature" in feature and feature["gainSubclassFeature"]==True:
-                        #     currentsubclassFeature += 1
+                        if "gainSubclassFeature" in feature and feature["gainSubclassFeature"]==True:
+                            currentsubclassFeature += 1
                         continue
                 if args.skipua and 'source' in feature and feature['source'].startswith('UA'):
                     if args.verbose:
                         print("Skipping UA Feature:",m['name'],feature['name'])
-                    # if type(featureRef) == dict and "gainSubclassFeature" in featureRef and featureRef["gainSubclassFeature"]==True:
-                    #     currentsubclassFeature += 1
+                    if type(featureRef) == dict and "gainSubclassFeature" in featureRef and featureRef["gainSubclassFeature"]==True:
+                        currentsubclassFeature += 1
                     continue
                 if args.onlyofficial and \
                     m['source'] not in ['UAModifyingClasses', 'UARanger', 'UATheRangerRevised']:
-                    if 'source' in feature and feature['source'] not in args.onlyofficial:
+                    if 'source' in feature and feature['source'] not in args.onlyofficial and \
+                        not hasSubfeatureInSource(feature, args):
                         if args.verbose:
                             print("Skipping unoffical content: {} from {}".format(feature['name'],utils.getFriendlySource(feature['source'],args)))
-                        # if type(featureRef) == dict and "gainSubclassFeature" in featureRef and featureRef["gainSubclassFeature"]==True:
-                        #     currentsubclassFeature += 1
+                        if type(featureRef) == dict and "gainSubclassFeature" in featureRef and featureRef["gainSubclassFeature"]==True:
+                            currentsubclassFeature += 1
                         continue
+            # Check if subfeature is in the source
             if not args.onlyofficial or \
                 ('source' in feature and feature['source'] in args.onlyofficial) or \
+                hasSubfeatureInSource(feature, args) or \
                 m['source'] in ['UAModifyingClasses', 'UARanger', 'UATheRangerRevised']:
+                
                 autolevel = ET.SubElement(Class, 'autolevel', attributes)
                 attributes = {}
-                ft = ET.SubElement(autolevel, 'feature',attributes)
-                ftname = ET.SubElement(ft,'name')
-                ftname.text = utils.fixTags(feature["name"],m,args.nohtml)
+                
+                if not args.onlyofficial or (args.onlyofficial and feature['source'] in args.onlyofficial):
+                    ft = ET.SubElement(autolevel, 'feature',attributes)
+                    ftname = ET.SubElement(ft,'name')
+                    ftname.text = utils.fixTags(feature["name"],m,args.nohtml)
+                
                 for subfeature in feature['entries']:
                     if type(subfeature) == dict and 'type' in subfeature and subfeature['type'] == 'options':
                         for opt in subfeature['entries']:
@@ -318,9 +325,10 @@ def parseClass(m, compendium, args):
                                     SFText.text = "Source: " + utils.getFriendlySource(opt['source'],args) + " p. " + str(opt['page'])
                                 else:
                                     SFText.text = "Source: " + utils.getFriendlySource(opt['source'],args)
-                    else:
+                    elif not args.onlyofficial or (args.onlyofficial and feature['source'] in args.onlyofficial):
                         flatten_json(subfeature,m,ft,args, level,attributes)
-                if not args.srd:
+                if not args.srd and \
+                    not args.onlyofficial or (args.onlyofficial and feature['source'] in args.onlyofficial):
                     SFText = ET.SubElement(ft, 'text')
                     SFText.text = ""
                     SFText = ET.SubElement(ft, 'text')
@@ -501,3 +509,20 @@ def flatten_json(nested_json, d, Class, args, level, attributes,subclassname='')
     else:
         n = Class
     flatten(nested_json, n, args)
+
+
+def hasSubfeatureInSource(feature, args):
+    for subfeature in feature['entries']:
+        if type(subfeature) == dict and 'type' in subfeature and subfeature['type'] == 'options':
+            for opt in subfeature['entries']:
+                if opt["type"] == "refOptionalfeature":
+                    optRef = opt["optionalfeature"].split('|')
+                    if (len(optRef) == 1 and 'PHB' in args.onlyofficial) or \
+                        (len(optRef) == 2 and optRef[1] in args.onlyofficial):
+                        return True
+                elif opt["type"] == "refClassFeature":
+                    optRef = opt["classFeature"].split('|')
+                    if (len(optRef) == 1 and 'PHB' in args.onlyofficial) or \
+                        optRef[1] in args.onlyofficial:
+                        return True
+    return False
