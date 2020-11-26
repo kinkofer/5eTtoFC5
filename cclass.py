@@ -231,7 +231,7 @@ def parseClass(m, compendium, args):
                 (len(featureRefs) == 4 or cf["source"] == featureRefs[4]):
                     feature = cf
                     break
-            if not feature or feature['level'] != (level+1):
+            if not feature or feature['level'] != (level+1) or feature['className'] != m['name']:
                 continue
             if 'name' in feature and feature['name'] == "Ability Score Improvement":
                 attributes = {"level": str(level+1),"scoreImprovement":"YES"}
@@ -364,7 +364,7 @@ def parseClass(m, compendium, args):
                     #    ftname = ET.SubElement(ft,'name')
                     #    ftname.text = "{}: {}".format(utils.fixTags(m['subclassTitle'],m,args.nohtml),subclassname)
                     for subfeature in m['subclassFeature']:
-                        if subfeature['level'] != (level+1) or subfeature['subclassShortName'] != subclass['shortName']:
+                        if subfeature['level'] != (level+1) or subfeature['subclassShortName'] != subclass['shortName'] or subfeature['className'] != m['name']:
                             continue
                         if args.onlyofficial and \
                             "isClassFeatureVariant" in subfeature and subfeature['isClassFeatureVariant'] and \
