@@ -119,9 +119,6 @@ def parseItem(m, compendium, args):
         else:
             value.text = "{:g} cp".format(m['value'])
 
-    prop = ET.SubElement(itm, 'property')
-    if 'property' in m: prop.text = ",".join(m['property'])
-
     if 'staff' in m and m['staff']:
         headings.append('Staff')
         if 'type' not in m or m['type'] == 'SCF':
@@ -134,6 +131,28 @@ def parseItem(m, compendium, args):
 
     if 'weapon' in m and m['weapon'] and 'weaponCategory' in m:
         headings.append(m['weaponCategory'] + " Weapon")
+        if m['weaponCategory'] == 'martial':
+            if 'property' in m:
+                m['property'].append('M')
+            else:
+                m['property'] = ['M']
+
+    prop = ET.SubElement(itm, 'property')
+    if 'property' in m: 
+        if 'AF' in m['property']:
+            headings.append("Ammunication (futuristic)")
+            m['property'] = list(filter(lambda x: (x != 'AF'), m['property']))
+            if 'A' not in m['property']: 
+                m['property'].append('A')
+        if 'RLD' in m['property']:
+            headings.append("Reload")
+            m['property'] = list(filter(lambda x: (x != 'RLD'), m['property']))
+            if 'LD' not in m['property']: m['property'].append('LD')
+        if 'BF' in m['property']:
+            headings.append("Burst Fire")
+            m['property'] = list(filter(lambda x: (x != 'BF'), m['property']))
+            if 'R' not in m['property']: m['property'].append('R')
+        prop.text = ",".join(m['property'])
 
     if 'type' in m:
         if m['type'] == 'LA':

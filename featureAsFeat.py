@@ -9,11 +9,11 @@ from shutil import copyfile
 
 stats = {"str":"Strength","dex":"Dexterity","con":"Constitution","int":"Intelligence","wis":"Wisdom","cha":"Charisma"}
 
-def parseInvocation(m, compendium, args):
+def parseFeature(m, compendium, args):
     feat = ET.SubElement(compendium, 'feat')
 
     name = ET.SubElement(feat, 'name')
-    name.text = "Invocation: " + m['name']
+    name.text = m['name']
 
     prereqs = ET.SubElement(feat,'prerequisite')
     if 'prerequisite' in m:
@@ -25,60 +25,28 @@ def parseInvocation(m, compendium, args):
     bodyText = ET.SubElement(feat, 'text')
     bodyText.text = ""
 
-    if 'entries' in m:
-        bodyText.text = parseEntries(m, args)
-
-    for match in re.finditer(r'You gain proficiency in the ([^ ]*?)( and (.*?))? skill',bodyText.text):
-        bonusmod = ET.SubElement(feat, 'proficiency')
-        bonusmod.text = match.group(1)
-        if match.group(2) and match.group(3):
-            bonusmod.text = ", " + match.group(3)
-
-
-def parseInfusion(m, compendium, args):
-    feat = ET.SubElement(compendium, 'feat')
-
-    name = ET.SubElement(feat, 'name')
-    name.text = "Infusion: " + m['name']
-
-    prereqs = ET.SubElement(feat,'prerequisite')
-    if 'prerequisite' in m:
-        prereqs.text = getPrereqs(m)
-
-    if 'source' in m and not args.srd:
-        setSource(feat, m, args)
-
-    bodyText = ET.SubElement(feat, 'text')
-    bodyText.text = ""
+    featureTypeText = ""
+    featureType = m['featureType']
+    if type(m['featureType']) != list and ":" in m['featureType']:
+        featureType = [m['featureType']]
+    if type(featureType) == list:
+        featureTypes = {}
+        for t in featureType:
+            typeSubtype = t.split(':')
+            if len(typeSubtype) == 2:
+                if typeSubtype[0] not in featureTypes:
+                    featureTypes[typeSubtype[0]] = []
+                featureTypes[typeSubtype[0]].append(typeSubtype[1])
+        for k, v in featureTypes.items():
+            featureTypeText += "{}: ".format(getFeatureType(k))
+            subs = []
+            for s in v:
+                subs.append(getFeatureSubtype(k, s))
+            featureTypeText += ", ".join(subs) + "\n"
+    bodyText.text += featureTypeText
 
     if 'entries' in m:
-        bodyText.text = parseEntries(m, args)
-
-    for match in re.finditer(r'You gain proficiency in the ([^ ]*?)( and (.*?))? skill',bodyText.text):
-        bonusmod = ET.SubElement(feat, 'proficiency')
-        bonusmod.text = match.group(1)
-        if match.group(2) and match.group(3):
-            bonusmod.text = ", " + match.group(3)
-
-
-def parseManeuver(m, compendium, args):
-    feat = ET.SubElement(compendium, 'feat')
-
-    name = ET.SubElement(feat, 'name')
-    name.text = "Maneuver: " + m['name']
-
-    prereqs = ET.SubElement(feat,'prerequisite')
-    if 'prerequisite' in m:
-        prereqs.text = getPrereqs(m)
-
-    if 'source' in m and not args.srd:
-        setSource(feat, m, args)
-
-    bodyText = ET.SubElement(feat, 'text')
-    bodyText.text = ""
-
-    if 'entries' in m:
-        bodyText.text = parseEntries(m, args)
+        bodyText.text += parseEntries(m, args)
 
     for match in re.finditer(r'You gain proficiency in the ([^ ]*?)( and (.*?))? skill',bodyText.text):
         bonusmod = ET.SubElement(feat, 'proficiency')
@@ -248,3 +216,25 @@ def parseEntries(m, args):
 
     bodyText = bodyText.rstrip()
     return bodyText
+
+
+# Return the full name of the featureType
+def getFeatureType(t):
+    if t == "AF": return "Alchemical Formula"
+    elif t == "AI": return "Artificer Infusion"
+    elif t == "AS": return "Arcane Shot"
+    elif t == "ED": return "Elemental Discipline"
+    elif t == "EI": return "Eldritch Infusion"
+    elif t == "MV": return "Maneuver"
+    elif t == "OR": return "Onamancy Rune"
+    elif t == "PB": return "Pact Boon"
+    elif t == "Rune": return "Rune"
+    else: return t
+
+# Return the subtype of the featureType, ex. "Battle Master" in MV:B
+def getFeatureSubtype(t, s):
+    if s == "V1-UA": return "V1 (UA)"
+    elif s == "V2-UA": return "V2 (UA)"
+    elif s == "B": return "Battle Master"
+    elif s == "C2-UA": return "Cavalier V2 (UA)"
+    else: return s

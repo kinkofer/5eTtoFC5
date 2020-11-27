@@ -348,15 +348,35 @@ def modTraits(trait,mod):
         elif mod['mode'] == 'scalarAddHit':
             for t in range(len(trait)):
                 for i in range(len(trait[t]["entries"])):
-                    for match in re.finditer(r'{@hit ([-+0-9]*)}',trait[t]["entries"][i]):
-                        toHit = int(match.group(1)) + mod['scalar']
-                        trait[t]["entries"][i] = modRepl(trait[t]["entries"][i],match.group(0),"{{@hit {:+d}}}".format(toHit),"")
+                    def iterDict(d):
+                        if type(d) == dict:
+                            for k,v in d.items():
+                                d[k] = iterDict(v)
+                        elif type(d) == list:
+                            for i in range(len(d)):
+                                d[i] = iterDict(d[i])
+                        elif type(d) == str:
+                            for match in re.finditer(r'{@hit ([-+0-9]*)}',d):
+                                toHit = int(match.group(1)) + mod['scalar']
+                                d = modRepl(d,match.group(0),"{{@hit {:+d}}}".format(toHit),"")
+                        return d
+                    trait[t]["entries"][i] = iterDict(trait[t]["entries"][i])
         elif mod['mode'] == 'scalarAddDc':
             for t in range(len(trait)):
                 for i in range(len(trait[t]["entries"])):
-                    for match in re.finditer(r'{@dc ([-+0-9]*)}',trait[t]["entries"][i]):
-                        dc = int(match.group(1)) + mod['scalar']
-                        trait[t]["entries"][i] = modRepl(trait[t]["entries"][i],match.group(0),"{{@dc {:d}}}".format(dc),"")
+                    def iterDict(d):
+                        if type(d) == dict:
+                            for k,v in d.items():
+                                d[k] = iterDict(v)
+                        elif type(d) == list:
+                            for i in range(len(d)):
+                                d[i] = iterDict(d[i])
+                        elif type(d) == str:
+                            for match in re.finditer(r'{@dc ([-+0-9]*)}',d):
+                                dc = int(match.group(1)) + mod['scalar']
+                                d = modRepl(d,match.group(0),"{{@dc {:d}}}".format(dc),"")
+                        return d
+                    trait[t]["entries"][i] = iterDict(trait[t]["entries"][i])
         else:
             print("Unhandled tmode: " + mod['mode'],mod)
     return trait
